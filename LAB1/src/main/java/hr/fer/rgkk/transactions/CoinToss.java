@@ -41,8 +41,28 @@ public class CoinToss extends ScriptTransaction {
 
     @Override
     public Script createLockingScript() {
-        // TODO: Create Locking script
-        throw new UnsupportedOperationException();
+        return new ScriptBuilder()
+                .op(OP_DUP).op(OP_HASH160).data(aliceNonce).op(OP_HASH160).op(OP_EQUALVERIFY)
+                .op(OP_SWAP)
+                .op(OP_DUP).op(OP_HASH160).data(bobNonce).op(OP_HASH160).op(OP_EQUALVERIFY)
+                .op(OP_SIZE).op(OP_NIP)
+                .op(OP_SWAP)
+                .op(OP_SIZE).op(OP_NIP)
+                .number(16).op(OP_SUB)
+                .op(OP_SWAP)
+                .number(16).op(OP_SUB)
+                .op(OP_BOOLOR)
+                .op(OP_SWAP)
+                .data(bobKey.getPubKey())
+                .op(OP_CHECKSIG)
+                .op(OP_IF)
+                    .smallNum(1)
+                    .op(OP_EQUAL)
+                .op(OP_ELSE)
+                    .smallNum(0)
+                    .op(OP_EQUAL)
+                .op(OP_ENDIF)
+                .build();
     }
 
     @Override
