@@ -40,10 +40,11 @@ public class ScriptTest {
         Transaction transaction = scriptTransaction.createOutgoingTransaction(inputScript, Coin.CENT);
         TransactionOutput relevantOutput = transaction.getOutputs().stream().filter(to -> to.getScriptPubKey().equals(inputScript)).findAny().get();
         Transaction redemptionTransaction = scriptTransaction.createUnsignedRedemptionTransaction(relevantOutput, scriptTransaction.getReceiveAddress());
-        Script redeemScript = scriptTransaction.createUnlockingScript(redemptionTransaction);
 
         redemptionTransaction.getInput(0).setSequenceNumber(scriptTransaction.getNSequence());
         redemptionTransaction.setLockTime(scriptTransaction.getNLockTime());
+
+        Script redeemScript = scriptTransaction.createUnlockingScript(redemptionTransaction);
 
         LOGGER.info("Transaction:\n{}", transaction);
         LOGGER.info("Transaction SigOps: {}", transaction.getSigOpCount());
