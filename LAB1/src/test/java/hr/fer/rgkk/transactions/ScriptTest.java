@@ -16,8 +16,8 @@ import java.time.Instant;
 
 public class ScriptTest {
 
-    private WalletKit walletKit;
-    private NetworkParameters networkParameters;
+    private final WalletKit walletKit;
+    private final NetworkParameters networkParameters;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ScriptTest.class);
 

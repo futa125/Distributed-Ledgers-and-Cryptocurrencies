@@ -8,9 +8,6 @@ import org.bitcoinj.wallet.SendRequest;
 import org.bitcoinj.wallet.Wallet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spongycastle.util.encoders.Hex;
-
-import java.time.Instant;
 
 public abstract class ScriptTransaction implements AutoCloseable {
 

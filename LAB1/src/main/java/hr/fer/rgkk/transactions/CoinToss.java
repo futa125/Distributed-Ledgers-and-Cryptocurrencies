@@ -3,7 +3,6 @@ package hr.fer.rgkk.transactions;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
-import org.bitcoinj.core.Utils;
 import org.bitcoinj.crypto.TransactionSignature;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptBuilder;
@@ -41,27 +40,60 @@ public class CoinToss extends ScriptTransaction {
 
     @Override
     public Script createLockingScript() {
-        return new ScriptBuilder()
-                .op(OP_DUP).op(OP_HASH160).data(aliceNonce).op(OP_HASH160).op(OP_EQUALVERIFY)
+        int n = 16;
+        return new ScriptBuilder()          // Stack = | aliceNonce, bobNonce, signature |
+                .op(OP_DUP)                 // Stack = | aliceNonce, aliceNonce, bobNonce, signature |
+                .op(OP_HASH160)             // Stack = | aliceNonceHash, aliceNonce, bobNonce, signature |
+                .data(aliceNonce)           // Stack = | aliceNonce, aliceNonceHash, aliceNonce, bobNonce, signature |
+                .op(OP_HASH160)             // Stack = | aliceNonceHash, aliceNonceHash, aliceNonce, bobNonce, signature |
+                .op(OP_EQUALVERIFY)         // Stack = | aliceNonce, bobNonce, signature |
+                .op(OP_SWAP)                // Stack = | bobNonce, aliceNonce, signature |
+                .op(OP_DUP)                 // Stack = | bobNonce, bobNonce, aliceNonce, signature |
+                .op(OP_HASH160)             // Stack = | bobNonceHash, bobNonce, aliceNonce, signature |
+                .data(bobNonce)             // Stack = | bobNonce, bobNonceHash, bobNonce, aliceNonce, signature |
+                .op(OP_HASH160)             // Stack = | bobNonceHash, bobNonceHash, bobNonce, aliceNonce, signature |
+                .op(OP_EQUALVERIFY)         // Stack = | bobNonce, aliceNonce, signature |
+                .op(OP_SIZE)                // Stack = | bobNonceSize, bobNonce, aliceNonce, signature |
+                .op(OP_NIP)                 // Stack = | bobNonceSize, aliceNonce, signature |
+                .op(OP_SWAP)                // Stack = | aliceNonce, bobNonceSize, signature |
+                .op(OP_SIZE)                // Stack = | aliceNonceSize, aliceNonce, bobNonceSize, signature |
+                .op(OP_NIP)                 // Stack = | aliceNonceSize, bobNonceSize, signature |
+                .number(n)                  // Stack = | 16, aliceNonceSize, bobNonceSize, signature |
+                .op(OP_SUB)                 // Stack = | aliceChoice, bobNonceSize, signature |
+                .op(OP_SWAP)                // Stack = | bobNonceSize, aliceChoice, signature |
+                .number(n)                  // Stack = | 16, bobNonceSize, aliceChoice, signature |
+                .op(OP_SUB)                 // Stack = | bobChoice, aliceChoice, signature |
+                .op(OP_BOOLOR)              // Stack = | headsOrTailsResult, signature |
+                .op(OP_SWAP)                // Stack = | signature, headsOrTailsResult |
+                .op(OP_DUP)                 // Stack = | signature, signature, headsOrTailsResult |
+                .data(bobKey.getPubKey())   // Stack = | bobPubKey, signature, signature, headsOrTailsResult |
+                .op(OP_CHECKSIG)            // Stack = | isBobWinner, signature, headsOrTailsResult |
+                .op(OP_SWAP)                // Stack = | signature, isBobWinner, headsOrTailsResult |
+                .data(aliceKey.getPubKey()) // Stack = | alicePubKey, signature, isBobWinner, headsOrTailsResult |
+                .op(OP_CHECKSIG)            // Stack = | isAliceWinner, isBobWinner, headsOrTailsResult |
+
+                .op(OP_3DUP)                // Stack = | isAliceWinner, isBobWinner, headsOrTailsResult,
+                                            //           isAliceWinner, isBobWinner, headsOrTailsResult |
+
+                // Voodoo magic (Boolean expression generated from truth table)
+                // Result * BobSignatureValid * ~AliceSignatureValid
+                .op(OP_NOT)
+                .op(OP_BOOLAND)
+                .op(OP_BOOLAND)
+                .op(OP_TOALTSTACK)
+
+                // ~Result * ~BobSignatureValid * AliceSignatureValid
                 .op(OP_SWAP)
-                .op(OP_DUP).op(OP_HASH160).data(bobNonce).op(OP_HASH160).op(OP_EQUALVERIFY)
-                .op(OP_SIZE).op(OP_NIP)
+                .op(OP_NOT)
+                .op(OP_BOOLAND)
                 .op(OP_SWAP)
-                .op(OP_SIZE).op(OP_NIP)
-                .number(16).op(OP_SUB)
-                .op(OP_SWAP)
-                .number(16).op(OP_SUB)
+                .op(OP_NOT)
+                .op(OP_BOOLAND)
+                .op(OP_FROMALTSTACK)
+
+                // (Result * BobSignatureValid * ~AliceSignatureValid) + (~Result * ~BobSignatureValid * AliceSignatureValid)
                 .op(OP_BOOLOR)
-                .op(OP_SWAP)
-                .data(bobKey.getPubKey())
-                .op(OP_CHECKSIG)
-                .op(OP_IF)
-                    .smallNum(1)
-                    .op(OP_EQUAL)
-                .op(OP_ELSE)
-                    .smallNum(0)
-                    .op(OP_EQUAL)
-                .op(OP_ENDIF)
+
                 .build();
     }
 

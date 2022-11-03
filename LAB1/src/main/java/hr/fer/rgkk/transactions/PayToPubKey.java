@@ -3,7 +3,6 @@ package hr.fer.rgkk.transactions;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.crypto.DeterministicKey;
-import org.bitcoinj.crypto.TransactionSignature;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptBuilder;
 
@@ -11,7 +10,7 @@ import static org.bitcoinj.script.ScriptOpCodes.OP_CHECKSIG;
 
 public class PayToPubKey extends ScriptTransaction {
 
-    private DeterministicKey key;
+    private final DeterministicKey key;
 
     public PayToPubKey(WalletKit walletKit, NetworkParameters parameters) {
         super(walletKit, parameters);
