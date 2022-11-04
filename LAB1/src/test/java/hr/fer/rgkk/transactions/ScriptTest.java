@@ -16,8 +16,8 @@ import java.time.Instant;
 
 public class ScriptTest {
 
-    private final WalletKit walletKit;
-    private final NetworkParameters networkParameters;
+    private WalletKit walletKit;
+    private NetworkParameters networkParameters;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ScriptTest.class);
 
@@ -109,7 +109,7 @@ public class ScriptTest {
             // Set to 0xFFFFFFFE
             timeLock.setNSequence(4294967294L);
             // Set lock time
-            timeLock.setNLockTime(Instant.parse("2013-10-01T02:00:00Z").getEpochSecond());
+            timeLock.setNLockTime(Instant.parse("2014-10-01T02:00:00Z").getEpochSecond());
             testTransaction(timeLock);
         } catch (Exception e) {
             e.printStackTrace();

@@ -3,6 +3,7 @@ package hr.fer.rgkk.transactions;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
+import org.bitcoinj.core.Utils;
 import org.bitcoinj.crypto.TransactionSignature;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptBuilder;
@@ -40,7 +41,6 @@ public class CoinToss extends ScriptTransaction {
 
     @Override
     public Script createLockingScript() {
-        int n = 16;
         return new ScriptBuilder()          // Stack = | aliceNonce, bobNonce, signature |
                 .op(OP_DUP)                 // Stack = | aliceNonce, aliceNonce, bobNonce, signature |
                 .op(OP_HASH160)             // Stack = | aliceNonceHash, aliceNonce, bobNonce, signature |
@@ -58,10 +58,10 @@ public class CoinToss extends ScriptTransaction {
                 .op(OP_SWAP)                // Stack = | aliceNonce, bobNonceSize, signature |
                 .op(OP_SIZE)                // Stack = | aliceNonceSize, aliceNonce, bobNonceSize, signature |
                 .op(OP_NIP)                 // Stack = | aliceNonceSize, bobNonceSize, signature |
-                .number(n)                  // Stack = | 16, aliceNonceSize, bobNonceSize, signature |
+                .number(16)                 // Stack = | 16, aliceNonceSize, bobNonceSize, signature |
                 .op(OP_SUB)                 // Stack = | aliceChoice, bobNonceSize, signature |
                 .op(OP_SWAP)                // Stack = | bobNonceSize, aliceChoice, signature |
-                .number(n)                  // Stack = | 16, bobNonceSize, aliceChoice, signature |
+                .number(16)                 // Stack = | 16, bobNonceSize, aliceChoice, signature |
                 .op(OP_SUB)                 // Stack = | bobChoice, aliceChoice, signature |
                 .op(OP_BOOLOR)              // Stack = | headsOrTailsResult, signature |
                 .op(OP_SWAP)                // Stack = | signature, headsOrTailsResult |
