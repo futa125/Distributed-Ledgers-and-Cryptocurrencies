@@ -48,19 +48,18 @@ public class TimeLock extends ScriptTransaction {
                     .op(OP_CHECKSIGVERIFY)              // Stack = | aliceSignature, 0 |
                     .smallNum(1)                        // Stack = | 1, aliceSignature, 0 |
 
-                                                        // Stack = | 0, aliceSignature, bobSignature, 0 |
-                .op(OP_ELSE)                            // Stack = | aliceSignature, bobSignature, 0 |
-                    .smallNum(2)                        // Stack = | 2, aliceSignature, bobSignature, 0 |
+                .op(OP_ELSE)                            // Stack = | bobSignature, aliceSignature, 0 |
+                    .smallNum(2)                        // Stack = | 2, bobSignature, aliceSignature, 0 |
 
                 .op(OP_ENDIF)
                 .data(aliceSecretKey.getPubKey())       // Stack = | alicePubKey, 1, aliceSignature, 0 |
-                                                        // Stack = | alicePubKey, 2, aliceSignature, bobSignature, 0 |
+                                                        // Stack = | alicePubKey, 2, bobSignature, aliceSignature, 0 |
 
                 .data(bobSecretKey.getPubKey())         // Stack = | bobPubKey, alicePubKey, 1, aliceSignature, 0 |
-                                                        // Stack = | bobPubKey, alicePubKey, 2, aliceSignature, bobSignature, 0 |
+                                                        // Stack = | bobPubKey, alicePubKey, 2, bobSignature, aliceSignature, 0 |
 
                 .smallNum(2)                            // Stack = | 2, bobPubKey, alicePubKey, 1, aliceSignature, 0 |
-                                                        // Stack = | 2, bobPubKey, alicePubKey, 2, aliceSignature, bobSignature, 0 |
+                                                        // Stack = | 2, bobPubKey, alicePubKey, 2, bobSignature, aliceSignature, 0 |
 
                 .op(OP_CHECKMULTISIG)                   // Stack = | if 1 out of 2 signatures is valid return True; else False |
                                                         // Stack = | if 2 out of 2 signatures are valid return True; else False |
