@@ -18,7 +18,7 @@ public class TimeLock extends ScriptTransaction {
     private final ECKey bobSecretKey = new ECKey();
     private final ECKey eveSecretKey = new ECKey();
 
-    private final byte[] timeBytes;
+    private final long time;
 
     public enum ScriptSigType {
         ALICE_AND_EVE, BOB_AND_EVE, ALICE_AND_BOB
@@ -29,17 +29,15 @@ public class TimeLock extends ScriptTransaction {
     public TimeLock(WalletKit walletKit, NetworkParameters parameters, ScriptSigType scriptSigType) {
         super(walletKit, parameters);
         this.scriptSigType = scriptSigType;
-        this.timeBytes = Utils.reverseBytes(
-                Utils.encodeMPI(BigInteger.valueOf(1412114400), false)
-        );
+        this.time = Instant.parse("2014-10-01T00:00:00Z").getEpochSecond();
     }
 
     @Override
     public Script createLockingScript() {
-        return new ScriptBuilder()
-                                                    // Stack = | 1, evePubKey, eveSignature, aliceSignature, 0 |
+        return new ScriptBuilder()                  // Stack = | 1, evePubKey, eveSignature, aliceSignature, 0 |
+
                 .op(OP_IF)                          // Stack = | evePubKey, eveSignature, aliceSignature, 0 |
-                .data(timeBytes)                    // Stack = | time, evePubKey, eveSignature, aliceSignature, 0 |
+                .number(this.time)                  // Stack = | time, evePubKey, eveSignature, aliceSignature, 0 |
                 .op(OP_CHECKLOCKTIMEVERIFY)         // Stack = | time, evePubKey, eveSignature, aliceSignature, 0 |
                 .op(OP_DROP)                        // Stack = | evePubKey, eveSignature, aliceSignature, 0 |
                 .op(OP_DUP)                         // Stack = | evePubKey, evePubKey, eveSignature, aliceSignature, 0 |
