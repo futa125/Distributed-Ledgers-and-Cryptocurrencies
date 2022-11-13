@@ -34,34 +34,34 @@ public class TimeLock extends ScriptTransaction {
 
     @Override
     public Script createLockingScript() {
-        return new ScriptBuilder()                  // Stack = | 1, evePubKey, eveSignature, aliceSignature, 0 |
+        return new ScriptBuilder()                      // Stack = | 1, evePubKey, eveSignature, aliceSignature, 0 |
 
-                .op(OP_IF)                          // Stack = | evePubKey, eveSignature, aliceSignature, 0 |
-                .number(this.time)                  // Stack = | time, evePubKey, eveSignature, aliceSignature, 0 |
-                .op(OP_CHECKLOCKTIMEVERIFY)         // Stack = | time, evePubKey, eveSignature, aliceSignature, 0 |
-                .op(OP_DROP)                        // Stack = | evePubKey, eveSignature, aliceSignature, 0 |
-                .op(OP_DUP)                         // Stack = | evePubKey, evePubKey, eveSignature, aliceSignature, 0 |
-                .op(OP_HASH160)                     // Stack = | evePubKeyHash, evePubKey, eveSignature, aliceSignature, 0 |
-                .data(eveSecretKey.getPubKeyHash()) // Stack = | evePubKeyHash, evePubKeyHash, evePubKey, eveSignature, aliceSignature, 0 |
-                .op(OP_EQUALVERIFY)                 // Stack = | evePubKey, eveSignature, aliceSignature, 0 |
-                .op(OP_CHECKSIGVERIFY)              // Stack = | aliceSignature, 0 |
-                .smallNum(1)                        // Stack = | 1, aliceSignature, 0 |
+                .op(OP_IF)                              // Stack = | evePubKey, eveSignature, aliceSignature, 0 |
+                    .number(this.time)                  // Stack = | time, evePubKey, eveSignature, aliceSignature, 0 |
+                    .op(OP_CHECKLOCKTIMEVERIFY)         // Stack = | time, evePubKey, eveSignature, aliceSignature, 0 |
+                    .op(OP_DROP)                        // Stack = | evePubKey, eveSignature, aliceSignature, 0 |
+                    .op(OP_DUP)                         // Stack = | evePubKey, evePubKey, eveSignature, aliceSignature, 0 |
+                    .op(OP_HASH160)                     // Stack = | evePubKeyHash, evePubKey, eveSignature, aliceSignature, 0 |
+                    .data(eveSecretKey.getPubKeyHash()) // Stack = | evePubKeyHash, evePubKeyHash, evePubKey, eveSignature, aliceSignature, 0 |
+                    .op(OP_EQUALVERIFY)                 // Stack = | evePubKey, eveSignature, aliceSignature, 0 |
+                    .op(OP_CHECKSIGVERIFY)              // Stack = | aliceSignature, 0 |
+                    .smallNum(1)                        // Stack = | 1, aliceSignature, 0 |
 
-                .op(OP_ELSE)                        // Stack = | bobSignature, aliceSignature, 0 |
-                .smallNum(2)                        // Stack = | 2, bobSignature, aliceSignature, 0 |
+                .op(OP_ELSE)                            // Stack = | bobSignature, aliceSignature, 0 |
+                    .smallNum(2)                        // Stack = | 2, bobSignature, aliceSignature, 0 |
 
                 .op(OP_ENDIF)
-                .data(aliceSecretKey.getPubKey())   // Stack = | alicePubKey, 1, aliceSignature, 0 |
-                                                    // Stack = | alicePubKey, 2, bobSignature, aliceSignature, 0 |
+                .data(aliceSecretKey.getPubKey())       // Stack = | alicePubKey, 1, aliceSignature, 0 |
+                                                        // Stack = | alicePubKey, 2, bobSignature, aliceSignature, 0 |
 
-                .data(bobSecretKey.getPubKey())     // Stack = | bobPubKey, alicePubKey, 1, aliceSignature, 0 |
-                                                    // Stack = | bobPubKey, alicePubKey, 2, bobSignature, aliceSignature, 0 |
+                .data(bobSecretKey.getPubKey())         // Stack = | bobPubKey, alicePubKey, 1, aliceSignature, 0 |
+                                                        // Stack = | bobPubKey, alicePubKey, 2, bobSignature, aliceSignature, 0 |
 
-                .smallNum(2)                        // Stack = | 2, bobPubKey, alicePubKey, 1, aliceSignature, 0 |
-                                                    // Stack = | 2, bobPubKey, alicePubKey, 2, bobSignature, aliceSignature, 0 |
+                .smallNum(2)                            // Stack = | 2, bobPubKey, alicePubKey, 1, aliceSignature, 0 |
+                                                        // Stack = | 2, bobPubKey, alicePubKey, 2, bobSignature, aliceSignature, 0 |
 
-                .op(OP_CHECKMULTISIG)               // Stack = | if 1 out of 2 signatures is valid return True; else False |
-                                                    // Stack = | if 2 out of 2 signatures are valid return True; else False |
+                .op(OP_CHECKMULTISIG)                   // Stack = | if 1 out of 2 signatures is valid return True; else False |
+                                                        // Stack = | if 2 out of 2 signatures are valid return True; else False |
                 .build();
     }
 
