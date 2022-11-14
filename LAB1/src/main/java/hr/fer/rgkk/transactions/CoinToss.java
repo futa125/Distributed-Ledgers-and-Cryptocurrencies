@@ -53,6 +53,7 @@ public class CoinToss extends ScriptTransaction {
                 .data(bobNonce)             // Stack = | bobNonce, bobNonceHash, bobNonce, aliceNonce, signature |
                 .op(OP_HASH160)             // Stack = | bobNonceHash, bobNonceHash, bobNonce, aliceNonce, signature |
                 .op(OP_EQUALVERIFY)         // Stack = | bobNonce, aliceNonce, signature |
+
                 .op(OP_SIZE)                // Stack = | bobNonceSize, bobNonce, aliceNonce, signature |
                 .op(OP_NIP)                 // Stack = | bobNonceSize, aliceNonce, signature |
                 .op(OP_SWAP)                // Stack = | aliceNonce, bobNonceSize, signature |
@@ -64,6 +65,7 @@ public class CoinToss extends ScriptTransaction {
                 .number(16)                 // Stack = | 16, bobNonceSize, aliceChoice, signature |
                 .op(OP_SUB)                 // Stack = | bobChoice, aliceChoice, signature |
                 .op(OP_BOOLOR)              // Stack = | headsOrTailsResult, signature |
+
                 .op(OP_SWAP)                // Stack = | signature, headsOrTailsResult |
                 .op(OP_DUP)                 // Stack = | signature, signature, headsOrTailsResult |
                 .data(bobKey.getPubKey())   // Stack = | bobPubKey, signature, signature, headsOrTailsResult |
